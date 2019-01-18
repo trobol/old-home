@@ -6,3 +6,7 @@
 	path = v0.0
 	url = https://github.com/trobol/trobol.github.io.git
 	branch = master
+[submodule "v0.0-1-g499549e"]
+	path = v0.0-1-g499549e
+	url = https://github.com/trobol/trobol.github.io.git
+	branch = master
