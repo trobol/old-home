@@ -1,0 +1,8 @@
+[submodule "v1.1"]
+	path = v1.1
+	url = https://github.com/trobol/trobol.github.io.git
+	branch = master
+[submodule "v0.0"]
+	path = v0.0
+	url = https://github.com/trobol/trobol.github.io.git
+	branch = master
