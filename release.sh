@@ -13,5 +13,5 @@ else
 fi
 git add .
 git commit . -m 'auto update'
-git push
+git push --set-upstream origin gh-pages
 sleep 5 # Waits 0.5 second.
