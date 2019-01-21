@@ -1,0 +1,4 @@
+[submodule "projects/blog/latest"]
+	path = projects/blog/latest
+	url = https://github.com/trobol/blog
+	branch = master
