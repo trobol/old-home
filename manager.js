@@ -72,11 +72,13 @@ function update() {
 			//when a new version is created, the files will be put in there
 			if (fs.existsSync(`${__dirname}/projects/${name}/${version}`)) {
 				//update
-				if (updateLatest())
-					console.log(`Version ${version} Already Exits: Updating latest`)
-
+				console.log(`Version ${version} Already Exits: Updating latest`)
+				updateLatest(name);
 			} else {
-				//copy files to folder by version name
+				//create new submodule that that points to the version
+
+				//add submodule with tag as name
+				//checkout tag/<tag> -b master
 				updateLatest(name).then(r => {
 					copyFolderRecursiveSync(`${__dirname}/projects/${name}/latest`, `${__dirname}/projects/${name}/${version}`, `${__dirname}/projects/${name}/${version}`);
 				}).catch(e => {
