@@ -6,3 +6,7 @@
 	path = projects/server/latest
 	url = https://github.com/trobol/server
 	branch = master
+[submodule "projects/blog/1.0"]
+	path = projects/blog/1.0
+	url = https://github.com/trobol/blog
+	branch = master
