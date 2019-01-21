@@ -38,8 +38,9 @@ function add() {
 		run(`git submodule add -f -b master https://github.com/trobol/${name} projects/${name}/latest`, __dirname)
 			.catch(e => console.log('Error', e))
 			.then(() => {
-				run(`git commit --message="Added ${name} to site"`, __dirname)
-					.then(() => run(`git push`, __dirname));
+				run(['git', 'commit', `--message=Added ${name} to site`], __dirname)
+					.then(() => run(`git push`, __dirname).catch(e => console.log(e)))
+					.catch(e => console.log(e));
 			})
 	} else {
 		console.log(`Project: ${name} already exits`)
@@ -76,13 +77,14 @@ function update() {
 
 			} else {
 				//copy files to folder by version name
-				updateLatest().then(r => {
+				updateLatest(name).then(r => {
 					copyFolderRecursiveSync(`${__dirname}/projects/${name}/latest`, `${__dirname}/projects/${name}/${version}`, `${__dirname}/projects/${name}/${version}`);
 				}).catch(e => {
 					console.log(e);
 				}).then(() => {
-					run(`git commit -m "Updated ${name}`, __dirname)
-						.then(() => run(`git push`, __dirname))
+					run(['git', 'commit', `--message=Updated ${name}`], __dirname)
+						.then(() => run(`git push`, __dirname).catch(e => console.log(e)))
+						.catch(e => console.log(e))
 				});
 			}
 		});
@@ -110,10 +112,11 @@ function updateAllLatest() {
 			}, reject);
 	});
 }
-function run(input, cwd) {
+function run(args, cwd) {
 	return new Promise((resolve, reject) => {
-		let args = input.split(' '),
-			command = args.shift();
+		if (typeof args == 'string')
+			args = args.split(' ');
+		let command = args.shift();
 		const { spawn } = require('child_process'),
 			child = spawn(command, args, { cwd });
 		let stdout = '',
