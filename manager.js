@@ -1,54 +1,97 @@
-
+/*
+TODO:
+	Add support for new tags made outside system:
+		check againts tags in system
+		get repo at tag
+			git checkout tags/<tag_name>
+		add to folder by tag
+		update 'latest' to newest
+*/
 const wd = process.cwd(),
 	path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	name = wd.slice(wd.lastIndexOf('\\') + 1);
+if (wd == __dirname)
+	return;
+let args = process.argv,
+	operations = {
+		update,
+		add
+	}
+if (args[2]) {
+	if (fs.existsSync(`${wd}/.git`)) {
+		if (operations[args[2]]) {
+			operations[args[2]]();
+		} else {
+			console.log(operations);
+			console.log('Not an operation');
+		}
+	} else {
+		console.log('Not a project folder');
+	}
+} else {
+	console.log('No operation given');
+}
+function add() {
+	//check if the project already exits
+	if (!fs.existsSync(`${__dirname}/projects/${name}`)) {
+		run(`git submodule add -f -b master https://github.com/trobol/${name} projects/${name}/latest`, __dirname)
+			.catch(e => console.log('Error', e))
+			.then(() => {
+				run(`git commit --message="Added ${name} to site"`, __dirname)
+					.then(() => run(`git push`, __dirname));
+			})
+	} else {
+		console.log(`Project: ${name} already exits`)
+	}
 
-let args = process.args;
-
-
-updateSubmodules();
-//Add or Update folder in projects
-function a() {
+}
+//Update folder in projects
+function update() {
+	if (!fs.existsSync(`${__dirname}/projects/${name}`)) {
+		console.log(`'${name}' must be added first`);
+		return;
+	}
 	let version = 'latest';
-	run('git describe --tags --abbrev=0')
+	console.log(`Working in ${name}`);
+	run('git describe --tags --abbrev=0', `${__dirname}/projects/${name}/latest`)
 		.catch((error) => {
 			console.log('No Tags');
 		})
 		.then((v) => {
-			version = v;
+
+			if (v)
+				version = v.slice(0, v.length - 1);
 			if (!fs.existsSync(`${wd}/.git`)) {
 				console.log('The current folder does not contain a git repository');
 				process.exit();
 			}
 
-			let name = wd.slice(wd.lastIndexOf('\\') + 1);
-			console.log(wd);
-			console.log(name);
 			//all commits to master will be put into latest
 			//when a new version is created, the files will be put in there
 			if (fs.existsSync(`${__dirname}/projects/${name}/${version}`)) {
 				//update
-				updateSubmodules();
+				if (updateLatest())
+					console.log(`Version ${version} Already Exits: Updating latest`)
+
 			} else {
-				if (fs.existsSync(`${__dirname}/projects/${name}`)) {
-					//copy files to folder by version name
-					updateSubmodules().then(r => {
-						copyFolderRecursiveSync(`${__dirname}/projects/${name}/latest`, `${__dirname}/projects/${name}/${version}`, `${__dirname}/projects/${name}/${version}`);
-					});
-				} else {
-					//add project
-					console.log(`Adding ${name} to projects`);
-					run(`git submodule add https://github.com/trobol/${name} projects/${name}/latest`, `${__dirname}`)
-						.catch(e => console.log('Error', e));
-				}
-
-
-				console.log('file exists');
+				//copy files to folder by version name
+				updateLatest().then(r => {
+					copyFolderRecursiveSync(`${__dirname}/projects/${name}/latest`, `${__dirname}/projects/${name}/${version}`, `${__dirname}/projects/${name}/${version}`);
+				}).catch(e => {
+					console.log(e);
+				}).then(() => {
+					run(`git commit -m "Updated ${name}`, __dirname)
+						.then(() => run(`git push`, __dirname))
+				});
 			}
 		});
 }
+function updateLatest(path) {
+	return run(`git submodule update -f projects/${path}/latest`, __dirname);
+}
 //update submodules then return an object with the name of the repo and the branch hash
-function updateSubmodules() {
+function updateAllLatest() {
 	return new Promise((resolve, reject) => {
 		run('git submodule update -f', __dirname)
 			.then(r => {
@@ -63,9 +106,9 @@ function updateSubmodules() {
 					if (name && hash)
 						o[name] = hash;
 				}
-				console.log(o);
-			});
-	})
+				resolve(o);
+			}, reject);
+	});
 }
 function run(input, cwd) {
 	return new Promise((resolve, reject) => {
@@ -113,7 +156,9 @@ function copyFolderRecursiveSync(source, target, targetFolder) {
 
 	//check if folder needs to be created or integrated
 	targetFolder = targetFolder || path.join(target, path.basename(source));
+
 	if (!fs.existsSync(targetFolder)) {
+		console.log('made folder ' + targetFolder);
 		fs.mkdirSync(targetFolder);
 	}
 
