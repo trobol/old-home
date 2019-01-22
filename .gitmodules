@@ -2,23 +2,7 @@
 	path = projects/blog/latest
 	url = https://github.com/trobol/blog
 	branch = master
-[submodule "projects/blog/1.0"]
-	path = projects/blog/1.0
-	url = https://github.com/trobol/blog
-	branch = master
 [submodule "projects/sample-project/latest"]
 	path = projects/sample-project/latest
 	url = https://github.com/trobol/sample-project
-	branch = master
-[submodule "projects/blog/0.1"]
-	path = projects/blog/0.1
-	url = https://github.com/trobol/blog
-	branch = master
-[submodule "projects/blog/1.1"]
-	path = projects/blog/1.1
-	url = https://github.com/trobol/blog
-	branch = master
-[submodule "projects/blog/1.11"]
-	path = projects/blog/1.11
-	url = https://github.com/trobol/blog
 	branch = master
