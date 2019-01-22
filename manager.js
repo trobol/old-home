@@ -60,35 +60,28 @@ function update() {
 	if (v)
 		version = v.slice(0, v.length - 1);
 
-	//all commits to master will be put into latest
-	//when a new version is created, the files will be put in there
-	if (fs.existsSync(`${__dirname}/projects/${name}/${version}`)) {
-		//update
-		console.log(`Version ${version} Already Exits: Updating latest`)
-		updateLatest(name);
-	} else {
-		//create new submodule that that points to the version
-		//update latest
-		updateLatest(name);
+	//create new submodule that that points to the version
+	//update latest
+	updateLatest(name);
 
-		//get tags
-		let tags = run('git tag', `${__dirname}/projects/${name}/latest`).stdout.toString();
-		tags = tags.split('\n');
-		tags.pop();
-		//for every tag
-		for (let tag of tags) {
-			//if no folder with name
-			if (!fs.existsSync(`${__dirname}/projects/${name}/${tag}`)) {
-				//add submodule with tag as name
-				run(`git submodule add -f -b master https://github.com/trobol/${name} projects/${name}/${tag}`, __dirname);
-				//checkout tag/<tag> -b master
-				run(`git checkout tag/${tag}`, `${__dirname}/projects/${name}/${tag}`);
-			}
-
+	//get tags
+	let tags = run('git tag', `${__dirname}/projects/${name}/latest`).stdout.toString();
+	tags = tags.split('\n');
+	tags.pop();
+	//for every tag
+	for (let tag of tags) {
+		//if no folder with name
+		if (!fs.existsSync(`${__dirname}/projects/${name}/${tag}`)) {
+			//add submodule with tag as name
+			run(`git submodule add -f -b master https://github.com/trobol/${name} projects/${name}/${tag}`, __dirname);
+			//checkout tag/<tag> -b master
+			run(`git checkout tags/${tag}`, `${__dirname}/projects/${name}/${tag}`);
 		}
-		run(['git', 'commit', `--message=Updated ${name}`], __dirname);
-		run(`git push`, __dirname);
+
 	}
+	run(['git', 'commit', `--message=Updated ${name}`], __dirname);
+	run(`git push`, __dirname);
+
 }
 function updateLatest(path) {
 	return run(`git submodule update -f projects/${path}/latest`, __dirname);
